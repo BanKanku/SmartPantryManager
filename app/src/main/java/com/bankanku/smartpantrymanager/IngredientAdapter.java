@@ -1,11 +1,14 @@
 
 package com.bankanku.smartpantrymanager;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,8 +20,11 @@ public class IngredientAdapter
         extends RecyclerView.Adapter<IngredientAdapter.IngredientViewHolder> {
 
     private final List<Ingredient> ingredients = new ArrayList<>();
+    private final DatabaseHelper databaseHelper;
 
-    public IngredientAdapter(List<Ingredient> initialIngredients) {
+    public IngredientAdapter(List<Ingredient> initialIngredients,
+                             DatabaseHelper databaseHelper) {
+        this.databaseHelper = databaseHelper;
         setIngredients(initialIngredients);
     }
 
@@ -56,9 +62,56 @@ public class IngredientAdapter
 
         holder.tvQuantity.setText(quantity);
 
-        // Editing will be connected in the next development step.
+        // Edit an existing ingredient
         holder.btnEdit.setOnClickListener(v -> {
-            // TODO: Open Edit Ingredient screen.
+            Intent intent = new Intent(
+                    holder.itemView.getContext(),
+                    AddIngredientActivity.class
+            );
+
+            intent.putExtra("ingredient_id", ingredient.getId());
+            intent.putExtra("ingredient_name", ingredient.getName());
+            intent.putExtra("ingredient_quantity", ingredient.getQuantity());
+            intent.putExtra("ingredient_unit", ingredient.getUnit());
+
+            holder.itemView.getContext().startActivity(intent);
+        });
+
+        // Delete an ingredient after confirmation
+        holder.btnDelete.setOnClickListener(v -> {
+
+            new AlertDialog.Builder(holder.itemView.getContext())
+                    .setTitle("Delete Ingredient")
+                    .setMessage(
+                            "Are you sure you want to delete "
+                                    + ingredient.getName() + "?"
+                    )
+                    .setPositiveButton("Delete", (dialog, which) -> {
+
+                        int rowsDeleted = databaseHelper.deleteIngredient(
+                                ingredient.getId()
+                        );
+
+                        if (rowsDeleted > 0) {
+                            setIngredients(databaseHelper.getAllIngredients());
+
+                            Toast.makeText(
+                                    holder.itemView.getContext(),
+                                    "Ingredient deleted successfully",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        } else {
+                            Toast.makeText(
+                                    holder.itemView.getContext(),
+                                    "Failed to delete ingredient",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) ->
+                            dialog.dismiss()
+                    )
+                    .show();
         });
     }
 
@@ -73,6 +126,7 @@ public class IngredientAdapter
         TextView tvName;
         TextView tvQuantity;
         Button btnEdit;
+        Button btnDelete;
 
         public IngredientViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -80,6 +134,7 @@ public class IngredientAdapter
             tvName = itemView.findViewById(R.id.tvIngredientName);
             tvQuantity = itemView.findViewById(R.id.tvIngredientQuantity);
             btnEdit = itemView.findViewById(R.id.btnEditIngredient);
+            btnDelete = itemView.findViewById(R.id.btnDeleteIngredient);
         }
     }
 }

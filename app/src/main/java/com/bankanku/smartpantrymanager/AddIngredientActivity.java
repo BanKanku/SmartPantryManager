@@ -17,6 +17,9 @@ public class AddIngredientActivity extends Activity {
     private Spinner spinnerUnit;
     private DatabaseHelper databaseHelper;
 
+    private boolean isEditMode = false;
+    private int ingredientId = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,18 +51,68 @@ public class AddIngredientActivity extends Activity {
 
         spinnerUnit.setAdapter(unitAdapter);
 
+        // Check whether an existing ingredient is being edited.
+        if (getIntent().hasExtra("ingredient_id")) {
+            ingredientId = getIntent().getIntExtra(
+                    "ingredient_id", -1
+            );
+
+            isEditMode = ingredientId > 0;
+        }
+
+        if (isEditMode) {
+            String name = getIntent().getStringExtra(
+                    "ingredient_name"
+            );
+
+            double quantity = getIntent().getDoubleExtra(
+                    "ingredient_quantity", 0
+            );
+
+            String unit = getIntent().getStringExtra(
+                    "ingredient_unit"
+            );
+
+            etIngredientName.setText(name);
+            etQuantity.setText(String.valueOf(quantity));
+
+            if (unit != null) {
+                int unitPosition = unitAdapter.getPosition(unit);
+
+                if (unitPosition >= 0) {
+                    spinnerUnit.setSelection(unitPosition);
+                }
+            }
+
+            btnSave.setText("Update Ingredient");
+
+
+
+
+            setTitle("Edit Ingredient");
+        } else {
+            setTitle("Add Ingredient");
+        }
+
         btnSave.setOnClickListener(v -> saveIngredient());
 
         btnCancel.setOnClickListener(v -> finish());
     }
 
     private void saveIngredient() {
-        String name = etIngredientName.getText().toString().trim();
-        String quantityText = etQuantity.getText().toString().trim();
-        String unit = spinnerUnit.getSelectedItem().toString();
+        String name = etIngredientName.getText()
+                .toString().trim();
+
+        String quantityText = etQuantity.getText()
+                .toString().trim();
+
+        String unit = spinnerUnit.getSelectedItem()
+                .toString();
 
         if (TextUtils.isEmpty(name)) {
-            etIngredientName.setError("Ingredient name is required");
+            etIngredientName.setError(
+                    "Ingredient name is required"
+            );
             etIngredientName.requestFocus();
             return;
         }
@@ -81,19 +134,40 @@ public class AddIngredientActivity extends Activity {
         }
 
         if (!Double.isFinite(quantity) || quantity <= 0) {
-            etQuantity.setError("Quantity must be greater than zero");
+            etQuantity.setError(
+                    "Quantity must be greater than zero"
+            );
             etQuantity.requestFocus();
             return;
         }
 
-        long result = databaseHelper.addIngredient(
-                name, quantity, unit
-        );
+        boolean success;
 
-        if (result != -1) {
+        if (isEditMode) {
+            int rowsUpdated = databaseHelper.updateIngredient(
+                    ingredientId,
+                    name,
+                    quantity,
+                    unit
+            );
+
+            success = rowsUpdated > 0;
+        } else {
+            long newId = databaseHelper.addIngredient(
+                    name,
+                    quantity,
+                    unit
+            );
+
+            success = newId != -1;
+        }
+
+        if (success) {
             Toast.makeText(
                     this,
-                    "Ingredient saved successfully",
+                    isEditMode
+                            ? "Ingredient updated successfully"
+                            : "Ingredient saved successfully",
                     Toast.LENGTH_SHORT
             ).show();
 
@@ -113,6 +187,7 @@ public class AddIngredientActivity extends Activity {
         if (databaseHelper != null) {
             databaseHelper.close();
         }
+
         super.onDestroy();
     }
 }

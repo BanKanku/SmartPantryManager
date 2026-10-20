@@ -52,8 +52,10 @@ public class MainActivity extends AppCompatActivity {
         );
 
         ingredientAdapter = new IngredientAdapter(
-                new ArrayList<>()
+                new ArrayList<>(),
+                databaseHelper
         );
+
 
         recyclerView.setAdapter(ingredientAdapter);
 
