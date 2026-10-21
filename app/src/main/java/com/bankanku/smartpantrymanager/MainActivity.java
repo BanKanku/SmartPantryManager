@@ -6,9 +6,6 @@ import android.os.Bundle;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,36 +15,22 @@ public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
     private IngredientAdapter ingredientAdapter;
+    private RecyclerView recyclerViewIngredients;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.main),
-                (view, windowInsets) -> {
-                    Insets systemBars = windowInsets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                    );
-
-                    view.setPadding(
-                            systemBars.left + dpToPx(20),
-                            systemBars.top + dpToPx(20),
-                            systemBars.right + dpToPx(20),
-                            systemBars.bottom + dpToPx(20)
-                    );
-
-                    return windowInsets;
-                }
-        );
-
+        // Connect to SQLite database
         databaseHelper = new DatabaseHelper(this);
 
-        RecyclerView recyclerView =
+        // Set up pantry RecyclerView
+        recyclerViewIngredients =
                 findViewById(R.id.recyclerViewIngredients);
 
-        recyclerView.setLayoutManager(
+        recyclerViewIngredients.setLayoutManager(
                 new LinearLayoutManager(this)
         );
 
@@ -56,9 +39,9 @@ public class MainActivity extends AppCompatActivity {
                 databaseHelper
         );
 
+        recyclerViewIngredients.setAdapter(ingredientAdapter);
 
-        recyclerView.setAdapter(ingredientAdapter);
-
+        // Add Ingredient button
         Button btnAddIngredient =
                 findViewById(R.id.btnAddIngredient);
 
@@ -67,8 +50,30 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this,
                     AddIngredientActivity.class
             );
-
             startActivity(intent);
+        });
+
+        // Suggested Recipes button
+        Button btnSuggestedRecipes =
+                findViewById(R.id.btnSuggestedRecipes);
+
+        btnSuggestedRecipes.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SuggestedRecipesActivity.class
+            );
+            startActivity(intent);
+        });
+
+        // Settings button will be implemented next
+        Button btnSettings = findViewById(R.id.btnSettings);
+
+        btnSettings.setOnClickListener(v -> {
+            android.widget.Toast.makeText(
+                    MainActivity.this,
+                    "Settings coming soon",
+                    android.widget.Toast.LENGTH_SHORT
+            ).show();
         });
 
         loadIngredients();
@@ -87,12 +92,6 @@ public class MainActivity extends AppCompatActivity {
         if (databaseHelper != null && ingredientAdapter != null) {
             loadIngredients();
         }
-    }
-
-    private int dpToPx(int dp) {
-        return Math.round(
-                dp * getResources().getDisplayMetrics().density
-        );
     }
 
     @Override
