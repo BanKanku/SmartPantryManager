@@ -1,39 +1,47 @@
 
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#F5F7F5"
-    android:padding="20dp">
+    android:padding="16dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Smart Pantry Manager"
+        android:textColor="#216B45"
         android:textSize="26sp"
         android:textStyle="bold"
-        android:textColor="#245C3D"
         android:gravity="center"
-        android:layout_marginBottom="12dp" />
+        android:paddingBottom="16dp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="My Pantry"
+        android:textColor="#216B45"
         android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#222222"
-        android:layout_marginBottom="8dp" />
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Manage your ingredients and reduce food waste."
+        android:text="Manage your ingredients and discover meals you can prepare."
         android:textSize="14sp"
-        android:textColor="#666666"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/tvEmptyPantry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Your pantry is empty. Tap Add Ingredient to get started."
+        android:textSize="16sp"
+        android:gravity="center"
+        android:padding="24dp"
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewIngredients"
@@ -41,21 +49,20 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingBottom="12dp" />
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp" />
 
     <Button
         android:id="@+id/btnAddIngredient"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Ingredient"
-        android:layout_marginBottom="10dp" />
+        android:text="Add Ingredient" />
 
     <Button
         android:id="@+id/btnSuggestedRecipes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Suggested Recipes"
-        android:layout_marginBottom="10dp" />
+        android:text="Suggested Recipes" />
 
     <Button
         android:id="@+id/btnSettings"

@@ -13,18 +13,35 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class IngredientAdapter
         extends RecyclerView.Adapter<IngredientAdapter.IngredientViewHolder> {
 
+    public interface OnIngredientsChangedListener {
+        void onIngredientsChanged();
+    }
+
     private final List<Ingredient> ingredients = new ArrayList<>();
     private final DatabaseHelper databaseHelper;
+    private final OnIngredientsChangedListener listener;
 
-    public IngredientAdapter(List<Ingredient> initialIngredients,
-                             DatabaseHelper databaseHelper) {
+    private final DecimalFormat quantityFormat = new DecimalFormat(
+            "0.##",
+            DecimalFormatSymbols.getInstance(Locale.US)
+    );
+
+    public IngredientAdapter(
+            List<Ingredient> initialIngredients,
+            DatabaseHelper databaseHelper,
+            OnIngredientsChangedListener listener) {
+
         this.databaseHelper = databaseHelper;
+        this.listener = listener;
         setIngredients(initialIngredients);
     }
 
@@ -57,12 +74,12 @@ public class IngredientAdapter
 
         holder.tvName.setText(ingredient.getName());
 
-        String quantity = ingredient.getQuantity()
-                + " " + ingredient.getUnit();
+        String quantity = quantityFormat.format(
+                ingredient.getQuantity()
+        ) + " " + ingredient.getUnit();
 
         holder.tvQuantity.setText(quantity);
 
-        // Edit an existing ingredient
         holder.btnEdit.setOnClickListener(v -> {
             Intent intent = new Intent(
                     holder.itemView.getContext(),
@@ -71,48 +88,52 @@ public class IngredientAdapter
 
             intent.putExtra("ingredient_id", ingredient.getId());
             intent.putExtra("ingredient_name", ingredient.getName());
-            intent.putExtra("ingredient_quantity", ingredient.getQuantity());
+            intent.putExtra(
+                    "ingredient_quantity",
+                    ingredient.getQuantity()
+            );
             intent.putExtra("ingredient_unit", ingredient.getUnit());
 
             holder.itemView.getContext().startActivity(intent);
         });
 
-        // Delete an ingredient after confirmation
-        holder.btnDelete.setOnClickListener(v -> {
+        holder.btnDelete.setOnClickListener(v ->
+                new AlertDialog.Builder(holder.itemView.getContext())
+                        .setTitle("Delete Ingredient")
+                        .setMessage(
+                                "Are you sure you want to delete "
+                                        + ingredient.getName() + "?"
+                        )
+                        .setPositiveButton("Delete", (dialog, which) -> {
+                            int deleted = databaseHelper.deleteIngredient(
+                                    ingredient.getId()
+                            );
 
-            new AlertDialog.Builder(holder.itemView.getContext())
-                    .setTitle("Delete Ingredient")
-                    .setMessage(
-                            "Are you sure you want to delete "
-                                    + ingredient.getName() + "?"
-                    )
-                    .setPositiveButton("Delete", (dialog, which) -> {
+                            if (deleted > 0) {
+                                if (listener != null) {
+                                    listener.onIngredientsChanged();
+                                } else {
+                                    setIngredients(
+                                            databaseHelper.getAllIngredients()
+                                    );
+                                }
 
-                        int rowsDeleted = databaseHelper.deleteIngredient(
-                                ingredient.getId()
-                        );
-
-                        if (rowsDeleted > 0) {
-                            setIngredients(databaseHelper.getAllIngredients());
-
-                            Toast.makeText(
-                                    holder.itemView.getContext(),
-                                    "Ingredient deleted successfully",
-                                    Toast.LENGTH_SHORT
-                            ).show();
-                        } else {
-                            Toast.makeText(
-                                    holder.itemView.getContext(),
-                                    "Failed to delete ingredient",
-                                    Toast.LENGTH_SHORT
-                            ).show();
-                        }
-                    })
-                    .setNegativeButton("Cancel", (dialog, which) ->
-                            dialog.dismiss()
-                    )
-                    .show();
-        });
+                                Toast.makeText(
+                                        holder.itemView.getContext(),
+                                        "Ingredient deleted successfully",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            } else {
+                                Toast.makeText(
+                                        holder.itemView.getContext(),
+                                        "Unable to delete ingredient",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show()
+        );
     }
 
     @Override
@@ -120,7 +141,7 @@ public class IngredientAdapter
         return ingredients.size();
     }
 
-    public static class IngredientViewHolder
+    static class IngredientViewHolder
             extends RecyclerView.ViewHolder {
 
         TextView tvName;
@@ -128,7 +149,7 @@ public class IngredientAdapter
         Button btnEdit;
         Button btnDelete;
 
-        public IngredientViewHolder(@NonNull View itemView) {
+        IngredientViewHolder(@NonNull View itemView) {
             super(itemView);
 
             tvName = itemView.findViewById(R.id.tvIngredientName);

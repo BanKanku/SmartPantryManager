@@ -3,18 +3,22 @@ package com.bankanku.smartpantrymanager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
     private IngredientAdapter ingredientAdapter;
+    private TextView tvEmptyPantry;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         databaseHelper = new DatabaseHelper(this);
+
+        tvEmptyPantry = findViewById(R.id.tvEmptyPantry);
 
         RecyclerView recyclerView =
                 findViewById(R.id.recyclerViewIngredients);
@@ -32,7 +38,8 @@ public class MainActivity extends AppCompatActivity {
 
         ingredientAdapter = new IngredientAdapter(
                 new ArrayList<>(),
-                databaseHelper
+                databaseHelper,
+                this::loadIngredients
         );
 
         recyclerView.setAdapter(ingredientAdapter);
@@ -56,8 +63,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadIngredients() {
-        ingredientAdapter.setIngredients(
-                databaseHelper.getAllIngredients()
+        List<Ingredient> ingredients =
+                databaseHelper.getAllIngredients();
+
+        ingredientAdapter.setIngredients(ingredients);
+
+        tvEmptyPantry.setVisibility(
+                ingredients.isEmpty() ? View.VISIBLE : View.GONE
         );
     }
 
@@ -75,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         if (databaseHelper != null) {
             databaseHelper.close();
         }
+
         super.onDestroy();
     }
 }

@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:padding="16dp"
+    android:padding="12dp"
     android:layout_marginBottom="8dp"
     android:background="#FFFFFF">
 
@@ -18,19 +18,18 @@
             android:id="@+id/tvIngredientName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Rice"
+            android:text="Ingredient"
+            android:textColor="#216B45"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#245C3D" />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvIngredientQuantity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:text="2 kg"
-            android:textSize="14sp"
-            android:textColor="#666666"
-            android:layout_marginTop="4dp" />
+            android:textSize="14sp" />
 
     </LinearLayout>
 
@@ -38,12 +37,16 @@
         android:id="@+id/btnEditIngredient"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Edit" />
+        android:minWidth="60dp"
+        android:text="Edit"
+        android:textSize="12sp" />
+
     <Button
         android:id="@+id/btnDeleteIngredient"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minWidth="70dp"
         android:text="Delete"
-        android:layout_marginStart="8dp" />
+        android:textSize="12sp" />
 
 </LinearLayout>
