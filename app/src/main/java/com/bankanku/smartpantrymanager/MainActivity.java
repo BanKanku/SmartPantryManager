@@ -15,22 +15,18 @@ public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
     private IngredientAdapter ingredientAdapter;
-    private RecyclerView recyclerViewIngredients;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
-        // Connect to SQLite database
         databaseHelper = new DatabaseHelper(this);
 
-        // Set up pantry RecyclerView
-        recyclerViewIngredients =
+        RecyclerView recyclerView =
                 findViewById(R.id.recyclerViewIngredients);
 
-        recyclerViewIngredients.setLayoutManager(
+        recyclerView.setLayoutManager(
                 new LinearLayoutManager(this)
         );
 
@@ -39,42 +35,22 @@ public class MainActivity extends AppCompatActivity {
                 databaseHelper
         );
 
-        recyclerViewIngredients.setAdapter(ingredientAdapter);
+        recyclerView.setAdapter(ingredientAdapter);
 
-        // Add Ingredient button
-        Button btnAddIngredient =
-                findViewById(R.id.btnAddIngredient);
+        Button btnAdd = findViewById(R.id.btnAddIngredient);
+        btnAdd.setOnClickListener(v -> startActivity(
+                new Intent(this, AddIngredientActivity.class)
+        ));
 
-        btnAddIngredient.setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    MainActivity.this,
-                    AddIngredientActivity.class
-            );
-            startActivity(intent);
-        });
+        Button btnRecipes = findViewById(R.id.btnSuggestedRecipes);
+        btnRecipes.setOnClickListener(v -> startActivity(
+                new Intent(this, SuggestedRecipesActivity.class)
+        ));
 
-        // Suggested Recipes button
-        Button btnSuggestedRecipes =
-                findViewById(R.id.btnSuggestedRecipes);
-
-        btnSuggestedRecipes.setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    MainActivity.this,
-                    SuggestedRecipesActivity.class
-            );
-            startActivity(intent);
-        });
-
-        // Settings button will be implemented next
         Button btnSettings = findViewById(R.id.btnSettings);
-
-        btnSettings.setOnClickListener(v -> {
-            android.widget.Toast.makeText(
-                    MainActivity.this,
-                    "Settings coming soon",
-                    android.widget.Toast.LENGTH_SHORT
-            ).show();
-        });
+        btnSettings.setOnClickListener(v -> startActivity(
+                new Intent(this, SettingsActivity.class)
+        ));
 
         loadIngredients();
     }
@@ -99,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
         if (databaseHelper != null) {
             databaseHelper.close();
         }
-
         super.onDestroy();
     }
 }
