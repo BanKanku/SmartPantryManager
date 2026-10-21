@@ -375,127 +375,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return required;
     }
 
-    // MATCHING ENGINE
 
-    private String normalizeName(String name) {
-        String value = name.trim().toLowerCase(Locale.ROOT);
-
-        if (value.endsWith("ies") && value.length() > 3) {
-            return value.substring(0, value.length() - 3) + "y";
-        }
-
-        if (value.endsWith("oes")) {
-            return value.substring(0, value.length() - 2);
-        }
-
-        if (value.endsWith("s") &&
-                !value.endsWith("ss") &&
-                value.length() > 3) {
-            return value.substring(0, value.length() - 1);
-        }
-
-        return value;
-    }
-
-    private double convertQuantity(double quantity,
-                                   String fromUnit, String toUnit) {
-
-        if (fromUnit.equalsIgnoreCase(toUnit)) {
-            return quantity;
-        }
-
-        String from = fromUnit.toLowerCase(Locale.ROOT);
-        String to = toUnit.toLowerCase(Locale.ROOT);
-
-        if (from.equals("kg") && to.equals("g")) {
-            return quantity * 1000;
-        }
-
-        if (from.equals("g") && to.equals("kg")) {
-            return quantity / 1000;
-        }
-
-        if (from.equals("l") && to.equals("ml")) {
-            return quantity * 1000;
-        }
-
-        if (from.equals("ml") && to.equals("l")) {
-            return quantity / 1000;
-        }
-
-        if (from.equals("cups") && to.equals("ml")) {
-            return quantity * 250;
-        }
-
-        if (from.equals("ml") && to.equals("cups")) {
-            return quantity / 250;
-        }
-
-        if (from.equals("tbsp") && to.equals("ml")) {
-            return quantity * 15;
-        }
-
-        if (from.equals("ml") && to.equals("tbsp")) {
-            return quantity / 15;
-        }
-
-        if (from.equals("tsp") && to.equals("ml")) {
-            return quantity * 5;
-        }
-
-        if (from.equals("ml") && to.equals("tsp")) {
-            return quantity / 5;
-        }
-
-        return -1;
-    }
+// MATCHING ENGINE
 
     public boolean canMakeRecipe(Recipe recipe) {
-        List<Ingredient> pantry = getAllIngredients();
-        List<RecipeIngredient> required =
-                getRecipeIngredients(recipe.getId());
-
-        if (required.isEmpty()) {
+        if (recipe == null) {
             return false;
         }
 
-        for (RecipeIngredient requirement : required) {
-            double available = 0;
-
-            for (Ingredient item : pantry) {
-                if (!normalizeName(item.getName()).equals(
-                        normalizeName(requirement.getIngredientName()))) {
-                    continue;
-                }
-
-                double converted = convertQuantity(
-                        item.getQuantity(),
-                        item.getUnit(),
-                        requirement.getUnit()
-                );
-
-                if (converted >= 0) {
-                    available += converted;
-                }
-            }
-
-            if (available + 0.000001 < requirement.getQuantity()) {
-                return false;
-            }
-        }
-
-        return true;
+        return RecipeMatcher.canMakeRecipe(
+                getAllIngredients(),
+                getRecipeIngredients(recipe.getId())
+        );
     }
 
     public List<Recipe> getSuggestedRecipes() {
         List<Recipe> suggestions = new ArrayList<>();
+        List<Ingredient> pantry = getAllIngredients();
 
         for (Recipe recipe : getAllRecipes()) {
-            if (canMakeRecipe(recipe)) {
+            List<RecipeIngredient> requirements =
+                    getRecipeIngredients(recipe.getId());
+
+            if (RecipeMatcher.canMakeRecipe(pantry, requirements)) {
                 suggestions.add(recipe);
             }
         }
 
         return suggestions;
     }
+
 }
