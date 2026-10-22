@@ -18,7 +18,9 @@ public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
     private IngredientAdapter ingredientAdapter;
+
     private TextView tvEmptyPantry;
+    private TextView tvIngredientCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(this);
 
         tvEmptyPantry = findViewById(R.id.tvEmptyPantry);
+        tvIngredientCount = findViewById(R.id.tvIngredientCount);
 
         RecyclerView recyclerView =
                 findViewById(R.id.recyclerViewIngredients);
@@ -67,6 +70,14 @@ public class MainActivity extends AppCompatActivity {
                 databaseHelper.getAllIngredients();
 
         ingredientAdapter.setIngredients(ingredients);
+
+        int count = ingredients.size();
+
+        String countText = count == 1
+                ? "1 ingredient"
+                : count + " ingredients";
+
+        tvIngredientCount.setText(countText);
 
         tvEmptyPantry.setVisibility(
                 ingredients.isEmpty() ? View.VISIBLE : View.GONE

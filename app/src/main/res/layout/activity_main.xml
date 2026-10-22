@@ -26,11 +26,21 @@
         android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/tvIngredientCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="0 ingredients"
+        android:textColor="#216B45"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Manage your ingredients and discover meals you can prepare."
         android:textSize="14sp"
-        android:layout_marginTop="6dp"
         android:layout_marginBottom="16dp" />
 
     <TextView
